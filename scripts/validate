@@ -1,0 +1,7 @@
+#!/bin/bash
+pushd examples/simple
+terraform init
+[ $? -ne 0 ] && exit 1
+terraform validate
+[ $? -ne 0 ] && exit 1
+popd

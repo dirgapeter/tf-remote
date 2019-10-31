@@ -1,0 +1,12 @@
+# Terraform files
+**/.terraform/
+*.tfstate*
+*.tfvars*
+
+# OS X files
+.history
+.DS_Store
+
+# Editors
+.vscode
+.idea
