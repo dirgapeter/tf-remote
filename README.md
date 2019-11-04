@@ -10,9 +10,9 @@ The S3 bucket is created with versioning, server-side encryption, and logging en
 
 ```hcl
 module "remote_state" {
-  source = "git::ssh://git@gitlab.com/aeroplan/tf-remote.git?ref=0.0.1"
+  source = "https://github.com/dirgapeter/tf-remote.git?ref=0.0.1"
 
-  project = "safire"
+  project = "simple"
   environment = "dev"
 }
 ```
@@ -51,9 +51,9 @@ terraform {
   backend "s3" {
     region         = "eu-west-1"
     encrypt        = true
-    bucket         = "safire-dev-tf-remote-state"
+    bucket         = "simple-dev-tf-remote-state"
     key            = "terraform.tfstate"
-    dynamodb_table = "safire-dev-tf-remote-state-lock"
+    dynamodb_table = "simple-dev-tf-remote-state-lock"
   }
 }
 ```
@@ -64,9 +64,9 @@ data "terraform_remote_state" "state" {
   config = {
     region         = "eu-west-1"
     encrypt        = true
-    bucket         = "safire-dev-tf-remote-state"
+    bucket         = "simple-dev-tf-remote-state"
     key            = "terraform.tfstate"
-    dynamodb_table = "safire-dev-tf-remote-state-lock"
+    dynamodb_table = "simple-dev-tf-remote-state-lock"
   }
 }
 ```
