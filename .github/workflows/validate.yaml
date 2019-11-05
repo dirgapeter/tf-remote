@@ -1,0 +1,14 @@
+name: validate
+on: [push]
+
+jobs:
+  build:
+    name: validate
+    runs-on: ubuntu-latest
+    container: dirgapeter/docker-actions-tf
+    steps:
+      - uses: actions/checkout@v1
+        with:
+            fetch-depth: 1
+      - name: validate
+        run: scripts/validate
