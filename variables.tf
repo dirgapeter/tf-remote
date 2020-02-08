@@ -49,3 +49,9 @@ variable "dynamodb_billing_mode" {
   type        = string
   default     = "PAY_PER_REQUEST"
 }
+
+variable "manage_kms_keys" {
+  description = "Defines whether this module should generate and manage its own kms keys"
+  type        = bool
+  default     = false
+}

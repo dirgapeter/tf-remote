@@ -29,6 +29,7 @@ module "remote_state" {
 
   manage_log_bucket = false
   manage_iam_role   = false
+  manage_kms_keys   = false
 
   tags = local.tags
 }

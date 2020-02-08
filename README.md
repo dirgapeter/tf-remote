@@ -76,25 +76,32 @@ data "terraform_remote_state" "state" {
 Two IAM groups are created. One for full access and one for read-only access.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | n/a |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| dynamodb\_billing\_mode | The DynamoDB billing mode. PAY_PER_REQUEST or PROVISIONED | string | `"PAY_PER_REQUEST"` | no |
-| environment | Environment of the remote state. Also used as a prefix in names of related resources. | string | n/a | yes |
-| logging\_prefix | A prefix in names for logging bucket | string | `"logs/"` | no |
-| manage\_iam\_role | Defines whether this module should generate and manage iam role for access | bool | `"true"` | no |
-| manage\_log\_bucket | Defines whether this module should generate and manage its own s3 bucket for logging | bool | `"true"` | no |
-| path | State file name, i.e. terraform | string | `"terraform"` | no |
-| project | Project of the remote state. Also used as a prefix in names of related resources. | string | n/a | yes |
-| suffix | A suffix in names with delimiter '-' included | string | `"-tf-remote-state"` | no |
-| tags | A map of tags to add to all resources. | map(string) | `{}` | no |
+|------|-------------|------|---------|:-----:|
+| dynamodb\_billing\_mode | The DynamoDB billing mode. PAY\_PER\_REQUEST or PROVISIONED | `string` | `"PAY_PER_REQUEST"` | no |
+| environment | Environment of the remote state. Also used as a prefix in names of related resources. | `string` | n/a | yes |
+| logging\_prefix | A prefix in names for logging bucket | `string` | `"logs/"` | no |
+| manage\_iam\_role | Defines whether this module should generate and manage iam role for access | `bool` | `true` | no |
+| manage\_kms\_keys | Defines whether this module should generate and manage its own kms keys | `bool` | `false` | no |
+| manage\_log\_bucket | Defines whether this module should generate and manage its own s3 bucket for logging | `bool` | `true` | no |
+| path | State file name, i.e. terraform | `string` | `"terraform"` | no |
+| project | Project of the remote state. Also used as a prefix in names of related resources. | `string` | n/a | yes |
+| suffix | A suffix in names with delimiter '-' included | `string` | `"-tf-remote-state"` | no |
+| tags | A map of tags to add to all resources. | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| bucket\_id |  |
+| bucket\_id | n/a |
 | config\_backend | Terraform excerpt with state backend configuration. |
 | config\_data | Terraform data excerpt with state backend configuration. |
 

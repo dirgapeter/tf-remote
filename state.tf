@@ -3,9 +3,27 @@ locals {
   bucket_logs_name = "${local.name_lower}-logs"
 }
 
-data "aws_iam_policy_document" "full_access" {
+data "aws_iam_policy_document" "full_access_kms" {
+  count = var.manage_iam_role && var.manage_kms_keys ? 1 : 0
 
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kms:*",
+    ]
+
+    resources = [
+      "${aws_kms_key.this[0].arn}"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "full_access" {
   count = var.manage_iam_role ? 1 : 0
+
+  source_json = var.manage_kms_keys ? data.aws_iam_policy_document.full_access_kms[0].json : null
+
   statement {
     effect = "Allow"
 
@@ -30,46 +48,10 @@ data "aws_iam_policy_document" "full_access" {
       "arn:aws:s3:::${local.bucket_name}/*.tfstate",
     ]
   }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "kms:*",
-    ]
-
-    resources = [
-      "${aws_kms_key.this.arn}"
-    ]
-  }
 }
 
-data "aws_iam_policy_document" "read_access" {
-
-  count = var.manage_iam_role ? 1 : 0
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "s3:ListBucket",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${local.bucket_name}",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "s3:GetObject",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${local.bucket_name}/*.tfstate",
-    ]
-  }
+data "aws_iam_policy_document" "read_access_kms" {
+  count = var.manage_iam_role && var.manage_kms_keys ? 1 : 0
 
   statement {
     effect = "Allow"
@@ -93,7 +75,37 @@ data "aws_iam_policy_document" "read_access" {
     ]
 
     resources = [
-      "${aws_kms_key.this.arn}",
+      "${aws_kms_key.this[0].arn}",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "read_access" {
+  count = var.manage_iam_role ? 1 : 0
+
+  source_json = var.manage_kms_keys ? data.aws_iam_policy_document.read_access_kms[0].json : null
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}/*.tfstate",
     ]
   }
 }
@@ -103,7 +115,7 @@ data "aws_iam_policy_document" "read_access" {
 ################################################################################################################
 
 resource "aws_kms_key" "logs" {
-  count                   = var.manage_log_bucket ? 1 : 0
+  count                   = var.manage_log_bucket && var.manage_kms_keys ? 1 : 0
   description             = "Used to encrypt objects in the S3 Bucket: ${local.bucket_logs_name}"
   deletion_window_in_days = 7
   enable_key_rotation     = true
@@ -117,7 +129,7 @@ resource "aws_kms_key" "logs" {
 }
 
 resource "aws_kms_alias" "logs" {
-  count         = var.manage_log_bucket ? 1 : 0
+  count         = var.manage_log_bucket && var.manage_kms_keys ? 1 : 0
   name          = "alias/${local.bucket_logs_name}"
   target_key_id = aws_kms_key.logs[0].key_id
 }
@@ -136,8 +148,8 @@ resource "aws_s3_bucket" "logs" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm     = "aws:kms"
-        kms_master_key_id = aws_kms_key.logs[0].arn
+        sse_algorithm     = var.manage_kms_keys ? "aws:kms" : "AES256"
+        kms_master_key_id = var.manage_kms_keys ? aws_kms_key.logs[0].arn : null
       }
     }
   }
@@ -165,6 +177,7 @@ resource "aws_s3_bucket_public_access_block" "public_access_logs" {
 ################################################################################################################
 
 resource "aws_kms_key" "this" {
+  count                   = var.manage_kms_keys ? 1 : 0
   description             = "Used to encrypt objects in the S3 Bucket: ${local.bucket_name}"
   deletion_window_in_days = 7
   enable_key_rotation     = true
@@ -173,8 +186,9 @@ resource "aws_kms_key" "this" {
 }
 
 resource "aws_kms_alias" "this" {
+  count         = var.manage_kms_keys ? 1 : 0
   name          = "alias/${local.bucket_name}"
-  target_key_id = aws_kms_key.this.key_id
+  target_key_id = aws_kms_key.this[0].key_id
 }
 
 resource "aws_s3_bucket" "this" {
@@ -199,8 +213,8 @@ resource "aws_s3_bucket" "this" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.this.arn
-        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.manage_kms_keys ? aws_kms_key.this[0].arn : null
+        sse_algorithm     = var.manage_kms_keys ? "aws:kms" : "AES256"
       }
     }
   }
